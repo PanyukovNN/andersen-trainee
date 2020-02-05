@@ -1,9 +1,9 @@
 package com.company.secondtask.figure;
 
 import com.company.secondtask.Field;
-import com.company.secondtask.Orientation;
 import com.company.secondtask.Position;
 import com.company.secondtask.command.Command;
+import com.company.secondtask.figure.orientation.Orientation;
 
 public class Tractor extends Figure {
 
