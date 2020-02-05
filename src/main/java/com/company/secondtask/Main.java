@@ -1,5 +1,10 @@
 package com.company.secondtask;
 
+import com.company.secondtask.command.Command;
+import com.company.secondtask.command.MoveForwardTractorCommand;
+import com.company.secondtask.command.TurnClockwiseTractorCommand;
+import com.company.secondtask.figure.Tractor;
+
 /**
  * Необходимо выполнить рефакторинг существующего кода - исправить все места, которые вам покажутся некрасивыми или не
  * правильными. Можно изменять этот класс и/или добавлять новые. Результатом работы должен быть код, который будет прост
@@ -10,15 +15,15 @@ package com.company.secondtask;
 public class Main {
 
     public static void main(String[] args) {
-        Field field = new Field();
-        field.initRectangleField(5);
+        Field field = new Field(5, 5);
         Position startTractorPosition = new Position(0, 0);
         Orientation startTractorOrientation = Orientation.NORTH;
-        Figure tractor = new Tractor(field, startTractorPosition, startTractorOrientation);
-
+        Tractor tractor = new Tractor(field, startTractorPosition, startTractorOrientation);
+        Command moveForwardTractor = new MoveForwardTractorCommand(tractor);
+        Command turnClockwiseTractorCommand = new TurnClockwiseTractorCommand(tractor);
         for (int i = 0; i < 3; i++) {
-            tractor.move("F");
+            tractor.move(moveForwardTractor);
+            tractor.move(turnClockwiseTractorCommand);
         }
-        System.out.println(tractor.position);
     }
 }
