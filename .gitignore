@@ -1,0 +1,12 @@
+.idea
+target
+**.iml
+**.properties
+**.exe
+**.txt
+**.csv
+**.zip
+src\main\resources
+**Rule.java
+**.log
+**.jar
