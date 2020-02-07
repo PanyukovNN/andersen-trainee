@@ -23,13 +23,6 @@ class ThirdTaskTest {
     }
 
     @Test
-    void foo_Insert_10_1_1_Return_4() {
-        int actual = thirdTask.foo(10, 1, 1);
-        int expected = 4;
-        assertEquals(expected, actual);
-    }
-
-    @Test
     void foo_Insert_20_3_3_Return_8() {
         int actual = thirdTask.foo(20, 3, 3);
         int expected = 8;
