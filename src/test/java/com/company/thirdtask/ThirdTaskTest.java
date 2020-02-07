@@ -1,38 +1,43 @@
 package com.company.thirdtask;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.*;
 
-class ThirdTaskTest {
+@RunWith(Parameterized.class)
+public class ThirdTaskTest {
 
-    private ThirdTask thirdTask;
+    private int money;
 
-    @BeforeEach
-    void setUp() {
-        thirdTask = new ThirdTask();
+    private int price;
+
+    private int k;
+
+    private int expected;
+
+    public ThirdTaskTest(int money, int price, int k, int expected) {
+        this.money = money;
+        this.price = price;
+        this.k = k;
+        this.expected = expected;
+    }
+
+    @Parameterized.Parameters(name = "{index}:candiesFor({0},{1},{2})={3}")
+    public static Iterable<Object[]> dataForTest() {
+        return Arrays.asList(new Object[][]{
+                {10, 3, 3, 4},
+                {20, 3, 3, 8},
+                {100, 3, 3, 49},
+                {105, 3, 3, 52}
+        });
     }
 
     @Test
-    void foo_Insert_10_3_3_Return_4() {
-        int actual = thirdTask.foo(10, 3, 3);
-        int expected = 4;
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void foo_Insert_20_3_3_Return_8() {
-        int actual = thirdTask.foo(20, 3, 3);
-        int expected = 8;
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void foo_Insert_105_3_3_Return_52() {
-        int actual = thirdTask.foo(105, 3, 3);
-        int expected = 52;
-        assertEquals(expected, actual);
+    public void paramTest() {
+        assertEquals(expected, new ThirdTask().buyCandies(money, price, k));
     }
 }

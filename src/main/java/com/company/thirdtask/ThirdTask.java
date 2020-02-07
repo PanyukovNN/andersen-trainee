@@ -20,7 +20,7 @@ public class ThirdTask {
      * Так, в случае подачи значений 10_3_3 - произойдет одна итерация цикла, соответственно сложность составит O(1)
      * Однако при указании значений 10_1_1 - цикл не прекратит свою работу
      */
-    public int foo(int money, int price, int k) {
+    public int buyCandies(int money, int price, int k) {
         int candies = money / price;
         int wrappers = candies;
         while (wrappers >= k) {
