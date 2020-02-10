@@ -1,9 +1,11 @@
 package com.company.firsttask;
 
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
+import org.w3c.dom.ls.LSOutput;
+
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Необходимо уменьшить время выполнения вычислений.
@@ -14,35 +16,58 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 public class Test {
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         long startTime = System.currentTimeMillis();
-        Set<Double> res = new CopyOnWriteArraySet<>();
-        List<Thread> threadsList = new CopyOnWriteArrayList<>();
-        ThreadManager threadManager = new ThreadManager();
-        runCalculation(res, threadsList, threadManager);
-        waitAllThreads(threadsList);
+        final Set<Double> res = new CopyOnWriteArraySet<>();
+        List<Thread> threads = createThreads(res);
+        waitAllThreads(threads);
         long endTime = System.currentTimeMillis();
         System.out.println(res);
         System.out.println(endTime - startTime);
     }
 
-    private static void runCalculation(Set<Double> res, List<Thread> allThreadsList, ThreadManager threadManager) throws InterruptedException {
-        Thread.UncaughtExceptionHandler handler = (th, ex) ->  {
-            System.out.println("Uncaught exception: " + ex);
-            System.exit(1);
-        };
-        for (int i = 0; i < TestConsts.N; i++) {
-            Thread thread = new SingleThread(i, res);
-            allThreadsList.add(thread);
-            thread.setUncaughtExceptionHandler(handler);
+    private static List<Thread> createThreads(Set<Double> res) {
+        Thread.UncaughtExceptionHandler handler = (th, ex) -> System.out.println("Uncaught exception: " + ex);
+        List<Thread> threads = new ArrayList<>();
+        for (int i = 0; i < TestConsts.MAX_THREADS; i++) {
+            List<Integer> valuesForThread = findValues(i);
+            Runnable runnable = () -> {
+                try {
+                    for (Integer j : valuesForThread) {
+                        if (Thread.interrupted()) {
+                            throw new CalculationException("Interrupted");
+                        }
+                        res.addAll(TestCalc.calculate(j));
+                    }
+                } catch (TestException e) {
+                    threads.forEach(Thread::interrupt);
+                    throw new CalculationException("Error while calculation.");
+                }
+            };
+            Thread thread = new Thread(runnable);
             thread.start();
-            threadManager.addThreadToQueue(thread);
+            thread.setUncaughtExceptionHandler(handler);
+            threads.add(thread);
         }
+        return threads;
     }
 
-    private static void waitAllThreads(List<Thread> allThreadsList) throws InterruptedException {
-        for (Thread thread : allThreadsList) {
-            thread.join();
+    private static List<Integer> findValues(int i) {
+        final int sizeOfSlice = (int) Math.round(TestConsts.N / (double) TestConsts.MAX_THREADS);
+        final int startValue = i * (sizeOfSlice);
+        final int endValue = i != TestConsts.MAX_THREADS - 1
+                ? Math.min(startValue + sizeOfSlice - 1, TestConsts.N - 1)
+                : TestConsts.N - 1;
+        return IntStream.rangeClosed(startValue, endValue).boxed().collect(Collectors.toList());
+    }
+
+    private static void waitAllThreads(List<Thread> allThreadsList) {
+        try {
+            for (Thread thread : allThreadsList) {
+                thread.join();
+            }
+        } catch (InterruptedException e) {
+            System.out.println("hmm");
         }
     }
 }
