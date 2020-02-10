@@ -1,7 +1,6 @@
 package com.company.thirdtask;
 
 import org.apache.log4j.Logger;
-import sun.rmi.runtime.Log;
 
 /**
  * Реализовать метод, который на вход принимает три параметра:
@@ -16,9 +15,7 @@ public class ThirdTask {
     private static final Logger LOG = Logger.getLogger(ThirdTask.class);
 
     /**
-     * Алгоритмическая сложность настоящего алгоритма варьируется от входных данных
-     * Так, в случае подачи значений 10_3_3 - произойдет одна итерация цикла, соответственно сложность составит O(1)
-     * Однако при указании значений 10_1_1 - цикл не прекратит свою работу
+     * Алгоритмическая сложность O(log (money/price) по основанию k)
      */
     public int buyCandies(int money, int price, int k) {
         int candies = money / price;
