@@ -2,7 +2,13 @@ package com.company.fouthtask;
 
 public class Service {
 
-    public void process(PrintStrategy strategy) {
+    private PrintStrategy strategy;
+
+    public Service(PrintStrategy strategy) {
+        this.strategy = strategy;
+    }
+
+    public void process() {
         strategy.print();
     }
 }

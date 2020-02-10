@@ -6,8 +6,7 @@ public class Main {
         MyClassLoader loader = new MyClassLoader();
         Class clazz = loader.findClass("LogOutStrategy");
         PrintStrategy logOutStrategy = (PrintStrategy) clazz.newInstance();
-        Service service = new Service();
-        service.process(new SystemOutStrategy());
-        service.process(logOutStrategy);
+        new Service(new SystemOutStrategy()).process();
+        new Service(logOutStrategy).process();
     }
 }

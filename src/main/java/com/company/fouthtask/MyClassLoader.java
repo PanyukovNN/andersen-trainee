@@ -4,7 +4,7 @@ import java.io.*;
 
 public class MyClassLoader extends ClassLoader {
 
-    public Class<?> findClass(String className) throws ClassNotFoundException {
+    public Class<?> findClass(String className) {
         try {
             File file = new File(this.getClass().getClassLoader().getResource(className + ".class").getFile());
             try (InputStream inputStream = new BufferedInputStream(new FileInputStream(file))) {
@@ -13,7 +13,7 @@ public class MyClassLoader extends ClassLoader {
                 return defineClass(null, bytes, 0, bytes.length);
             }
         } catch (IOException e) {
-            return super.findClass(className);
+            throw new MyClassLoaderException(e.getMessage(), e);
         }
     }
 }
