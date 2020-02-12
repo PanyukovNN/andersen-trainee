@@ -1,7 +1,5 @@
 package com.company.firsttask;
 
-import org.w3c.dom.ls.LSOutput;
-
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
