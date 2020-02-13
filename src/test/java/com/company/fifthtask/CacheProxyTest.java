@@ -2,7 +2,6 @@ package com.company.fifthtask;
 
 import org.junit.Test;
 
-import java.util.function.Supplier;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -10,21 +9,13 @@ public class CacheProxyTest {
 
     @Test
     public void cache() {
-        CacheProxy cacheProxy = new CacheProxy();
-//        Supplier supplier = mock(Supplier.class);
-        Supplier supplier = spy(new Supplier() {
-            @Override
-            @MyCacheAnnotation
-            public Object get() {
-                return null;
-            }
-        });
-        Supplier cacheSupplier = cacheProxy.cache(supplier);
+        Service service = mock(Service.class);
+        Service cacheService = CacheProxy.cache(service);
 
-        Object expected = cacheSupplier.get();
-        Object actual = cacheSupplier.get();
+        Object expected = cacheService.doHardWork();
+        Object actual = cacheService.doHardWork();
 
         assertEquals(expected, actual);
-        verify(supplier, times(1)).get();
+        verify(service, times(1)).doHardWork();
     }
 }
