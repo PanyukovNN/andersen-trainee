@@ -19,7 +19,10 @@ public class MyInvocationHandler implements InvocationHandler {
         Object result = records.get(method);
         if (result == null && !records.containsKey(method)) {
             result = method.invoke(service, args);
-            records.put(method, result);
+            Method serviceMethod = service.getClass().getDeclaredMethod(method.getName(), method.getParameterTypes());
+            if (serviceMethod.isAnnotationPresent(MyCacheAnnotation.class)) {
+                records.put(method, result);
+            }
         }
         return result;
     }
