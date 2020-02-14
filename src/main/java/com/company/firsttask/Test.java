@@ -1,5 +1,7 @@
 package com.company.firsttask;
 
+import org.apache.log4j.Logger;
+
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
@@ -14,36 +16,34 @@ import java.util.stream.IntStream;
  */
 public class Test {
 
+    private static final Logger LOG = Logger.getLogger(Test.class);
+
     public static void main(String[] args) {
         long startTime = System.currentTimeMillis();
         final Set<Double> res = new CopyOnWriteArraySet<>();
         List<Thread> threads = createThreads(res);
+        threads.forEach(Thread::start);
         waitAllThreads(threads);
         long endTime = System.currentTimeMillis();
-        System.out.println(res);
-        System.out.println(endTime - startTime);
+        LOG.info(res);
+        LOG.info(endTime - startTime);
     }
 
     private static List<Thread> createThreads(Set<Double> res) {
-        Thread.UncaughtExceptionHandler handler = (th, ex) -> System.out.println("Uncaught exception: " + ex);
         List<Thread> threads = new ArrayList<>();
+        Thread.UncaughtExceptionHandler handler = (th, ex) -> LOG.error("Uncaught exception: " + ex);
         for (int i = 0; i < TestConsts.MAX_THREADS; i++) {
             List<Integer> valuesForThread = findValues(i);
-            Runnable runnable = () -> {
+            Thread thread = new Thread(() -> {
                 try {
                     for (Integer j : valuesForThread) {
-                        if (Thread.interrupted()) {
-                            throw new CalculationException("Interrupted");
-                        }
                         res.addAll(TestCalc.calculate(j));
                     }
                 } catch (TestException e) {
                     threads.forEach(Thread::interrupt);
-                    throw new CalculationException("Error while calculation.");
+                    throw new CalculationException(e.getMessage(), e);
                 }
-            };
-            Thread thread = new Thread(runnable);
-            thread.start();
+            });
             thread.setUncaughtExceptionHandler(handler);
             threads.add(thread);
         }
@@ -65,7 +65,7 @@ public class Test {
                 thread.join();
             }
         } catch (InterruptedException e) {
-            System.out.println("hmm");
+            throw new CalculationException(e.getMessage(), e);
         }
     }
 }
