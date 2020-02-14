@@ -3,8 +3,8 @@ package com.company.firsttask;
 import org.apache.log4j.Logger;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Необходимо уменьшить время выполнения вычислений.
@@ -19,7 +19,7 @@ public class Test {
 
     public static void main(String[] args) {
         long startTime = System.currentTimeMillis();
-        final Set<Double> res = new CopyOnWriteArraySet<>();
+        final Set<Double> res = new HashSet<>();
         List<Thread> threads = createThreads(res);
         threads.forEach(Thread::start);
         waitAllThreads(threads);
@@ -31,22 +31,20 @@ public class Test {
     private static List<Thread> createThreads(Set<Double> res) {
         List<Thread> threads = new ArrayList<>();
         Thread.UncaughtExceptionHandler handler = (th, ex) -> LOG.error("Uncaught exception: " + ex);
-        Queue<Integer> values = new ConcurrentLinkedDeque<>();
-        for (int i = 0; i < TestConsts.N; i++) {
-            values.add(i);
-        }
+        AtomicBoolean hasError = new AtomicBoolean(false);
+        AtomicInteger value = new AtomicInteger(0);
         for (int i = 0; i < TestConsts.MAX_THREADS; i++) {
             Thread thread = new Thread(() -> {
                 try {
-                    while (!Thread.interrupted()) {
-                        Integer value = values.poll();
-                        if (value == null) {
-                            break;
+                    while (value.get() < TestConsts.N && !hasError.get()) {
+                        int currentValue = value.getAndIncrement();
+                        Set<Double> resultSet = TestCalc.calculate(currentValue);
+                        synchronized (res) {
+                            res.addAll(resultSet);
                         }
-                        res.addAll(TestCalc.calculate(value));
                     }
                 } catch (TestException e) {
-                    threads.forEach(Thread::interrupt);
+                    hasError.set(true);
                     throw new CalculationException(e.getMessage(), e);
                 }
             });
