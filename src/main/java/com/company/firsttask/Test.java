@@ -3,9 +3,8 @@ package com.company.firsttask;
 import org.apache.log4j.Logger;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * Необходимо уменьшить время выполнения вычислений.
@@ -32,12 +31,19 @@ public class Test {
     private static List<Thread> createThreads(Set<Double> res) {
         List<Thread> threads = new ArrayList<>();
         Thread.UncaughtExceptionHandler handler = (th, ex) -> LOG.error("Uncaught exception: " + ex);
+        Queue<Integer> values = new ConcurrentLinkedDeque<>();
+        for (int i = 0; i < TestConsts.N; i++) {
+            values.add(i);
+        }
         for (int i = 0; i < TestConsts.MAX_THREADS; i++) {
-            List<Integer> valuesForThread = findValues(i);
             Thread thread = new Thread(() -> {
                 try {
-                    for (Integer j : valuesForThread) {
-                        res.addAll(TestCalc.calculate(j));
+                    while (!Thread.interrupted()) {
+                        Integer value = values.poll();
+                        if (value == null) {
+                            break;
+                        }
+                        res.addAll(TestCalc.calculate(value));
                     }
                 } catch (TestException e) {
                     threads.forEach(Thread::interrupt);
@@ -48,15 +54,6 @@ public class Test {
             threads.add(thread);
         }
         return threads;
-    }
-
-    private static List<Integer> findValues(int i) {
-        final int sizeOfSlice = (int) Math.round(TestConsts.N / (double) TestConsts.MAX_THREADS);
-        final int startValue = i * (sizeOfSlice);
-        final int endValue = i != TestConsts.MAX_THREADS - 1
-                ? Math.min(startValue + sizeOfSlice - 1, TestConsts.N - 1)
-                : TestConsts.N - 1;
-        return IntStream.rangeClosed(startValue, endValue).boxed().collect(Collectors.toList());
     }
 
     private static void waitAllThreads(List<Thread> allThreadsList) {
