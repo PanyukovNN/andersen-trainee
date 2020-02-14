@@ -36,8 +36,15 @@ public class Test {
         for (int i = 0; i < TestConsts.MAX_THREADS; i++) {
             Thread thread = new Thread(() -> {
                 try {
-                    while (value.get() < TestConsts.N && !hasError.get()) {
-                        int currentValue = value.getAndIncrement();
+                    while (!hasError.get()) {
+                        int currentValue;
+                        synchronized (value) {
+                            if (value.get() >= TestConsts.N) {
+                                break;
+                            } else {
+                                currentValue = value.getAndIncrement();
+                            }
+                        }
                         Set<Double> resultSet = TestCalc.calculate(currentValue);
                         synchronized (res) {
                             res.addAll(resultSet);
